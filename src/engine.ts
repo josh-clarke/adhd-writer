@@ -70,9 +70,9 @@ Rules:
 
 const SCORE_SYSTEM = `You are in CONVERGENT mode. You are now the critic.
 Score each idea on three axes 0-10:
-- novelty: distance from the obvious default solution
-- viability: could this actually ship / work in practice
-- fit: how directly it addresses the stated problem
+- novelty: distance from the obvious default take
+- viability: could this actually work as a story / poem / script / piece
+- fit: how directly it addresses the stated prompt
 
 Tell the truth about weaknesses — don't soften the substance. But the
 critic's job is to produce two symmetric signals, not just one:
@@ -80,44 +80,44 @@ critic's job is to produce two symmetric signals, not just one:
 - "strength": required for every idea, even weak ones. The single most
   concrete thing this idea gets right that a competing idea doesn't.
 - "trap" (optional): if the idea looks attractive but has a hidden cost
-  (false economy, won't scale, premature abstraction), name it as a
-  specific, actionable heads-up — e.g. "solid for a prototype, breaks
-  past 10k concurrent users" — not a dismissal like "bad idea." The
-  fact stays the fact; only the framing changes: information you can
-  act on, not a verdict on the idea's worth.
+  (cliché, been-done-to-death, structurally broken, emotionally hollow),
+  name it as a specific, actionable heads-up — e.g. "solid for a first
+  draft, collapses under its own mythology by act three" — not a
+  dismissal like "bad idea." The fact stays the fact; only the framing
+  changes: information you can act on, not a verdict on the idea's worth.
 
 Output JSON only.`;
 
 const CLUSTER_SYSTEM = `You group ideas into 3-6 clusters by their UNDERLYING ANGLE
 (not by surface keywords). Cluster labels name the angle, e.g.
-"remove-the-server plays", "push-work-to-client plays", "cache-shaped plays".
+"unreliable-narrator plays", "constraint-box plays", "dream-logic plays",
+"genre-hybrid plays".
 Output JSON only.`;
 
-const REFRAME_SYSTEM = `You strip load-bearing anchors from a problem statement before divergent
-brainstorming. An anchor is an incidental implementation detail (a specific
-tech stack, an existing tool name, the current architecture) that isn't a
-real constraint but silently narrows every downstream idea to variations on
-what's already there.
+const REFRAME_SYSTEM = `You strip load-bearing anchors from a creative prompt before divergent
+brainstorming. An anchor is an incidental detail (a specific character name,
+a setting, a genre label, a plot point) that isn't a real constraint but
+silently narrows every downstream idea to variations on what's already there.
 
 Rules:
-- Keep anchors that are genuine immutable constraints: compliance/legal
-  requirements, hard budget or time limits, physical/protocol constraints,
+- Keep anchors that are genuine immutable constraints: the user's stated
+  theme, required emotional tone, hard structural limits (word count, form),
   anything the user would reject an answer for violating.
-- Strip anchors that are just "how it happens to be built today" — current
-  database, current framework, current team structure — UNLESS removing
-  them would make the problem meaningless or invite disallowed options.
-- If you strip something, restate the problem as the underlying
-  job-to-be-done, not the current implementation.
-- If nothing needs stripping, return the problem unchanged and set
+- Strip anchors that are just "how the first draft happens to be" — current
+  protagonist, current setting, current plot — UNLESS removing them would
+  make the prompt meaningless or invite disallowed options.
+- If you strip something, restate the prompt as the underlying creative
+  job-to-be-done, not the current draft.
+- If nothing needs stripping, return the prompt unchanged and set
   "changed" to false.
 Output JSON only: {"reframed": "...", "changed": true|false, "note": "one clause on what was stripped, omit if unchanged"}`;
 
 const DEEPEN_SYSTEM = `You are in FOCUS mode. Take one promising idea and connect dots:
-- Sketch how it would actually work (4-8 sentences).
-- Name the load-bearing risk.
-- Name the first concrete step a coder would take.
+- Sketch how it would actually work as a piece of writing (4-8 sentences).
+- Name the load-bearing risk (where it could fall apart emotionally or structurally).
+- Name the first concrete step a writer would take (a scene, a voice test, a structural outline).
 - Then generate 3-5 sub-ideas that branch off this one (variations,
-  combinations with other domains, things this unlocks).
+  combinations with other genres/forms, things this unlocks).
 Output JSON only.`;
 
 async function reframeProblem(
@@ -322,31 +322,31 @@ export async function run(opts: RunOptions): Promise<RunResult> {
     model,
     criticModel,
     onEvent,
-  } = opts;
+    } = opts;
 
-  // The critic (score + cluster) can run on a different model from the
-  // generator to decorrelate errors. Defaults to the generator model.
-  const critic = criticModel ?? model;
+    // The critic (score + cluster) can run on a different model from the
+    // generator to decorrelate errors. Defaults to the generator model.
+    const critic = criticModel ?? model;
 
-  // PHASE 0 — REFRAME. Strip incidental anchors (current stack, existing
-  // tool names) from the problem statement before it ever reaches a branch.
-  // Every branch otherwise sees the same raw problem, so an anchor buried
-  // in it infects all N branches regardless of branch isolation. Real
-  // constraints (compliance, budget, physical limits) are preserved.
-  // Convergence (score/cluster/deepen) still judges against the ORIGINAL
-  // problem — an idea has to fit the real constraints to be viable.
-  let divergeProblem = problem;
-  let reframe: string | undefined;
-  if (stripAnchors) {
-    const r = await reframeProblem(problem, context, model);
-    if (r.changed && r.reframed.trim().length > 0) {
-      divergeProblem = r.reframed;
-      reframe = r.reframed;
+    // PHASE 0 — REFRAME. Strip incidental anchors (current draft, existing
+    // character names) from the prompt before it ever reaches a branch.
+    // Every branch otherwise sees the same raw prompt, so an anchor buried
+    // in it infects all N branches regardless of branch isolation. Real
+    // constraints (theme, emotional tone, structural limits) are preserved.
+    // Convergence (score/cluster/deepen) still judges against the ORIGINAL
+    // prompt — an idea has to fit the real constraints to be viable.
+    let divergeProblem = problem;
+    let reframe: string | undefined;
+    if (stripAnchors) {
+      const r = await reframeProblem(problem, context, model);
+      if (r.changed && r.reframed.trim().length > 0) {
+        divergeProblem = r.reframed;
+        reframe = r.reframed;
+      }
+      onEvent?.({ kind: "reframe:done", changed: Boolean(reframe) });
     }
-    onEvent?.({ kind: "reframe:done", changed: Boolean(reframe) });
-  }
 
-  const frames = selectFrames(framesPerRun, codeMode);
+    const frames = selectFrames(framesPerRun, codeMode);
   const limit = pLimit(concurrency);
 
   // PHASE 1 — DIVERGE. Pure parallel fan-out. No branch sees another.
