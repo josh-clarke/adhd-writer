@@ -53,11 +53,11 @@ export type RunOptions = {
   ideasPerFrame?: number;              // default 6
   topK?: number;                       // how many to deepen, default 3
   concurrency?: number;                // parallel branches, default 4
-  codeMode?: boolean;                  // bias frames toward engineering
-  stripAnchors?: boolean;              // strip incidental anchors (current stack,
-                                       // existing tool names) from the problem before
+  codeMode?: boolean;                  // bias frames toward story/craft
+  stripAnchors?: boolean;              // strip incidental anchors (current draft,
+                                       // character names, settings) from the prompt before
                                        // fan-out, default true. Real constraints
-                                       // (compliance, budget, physical limits) are kept.
+                                       // (theme, emotional tone, structural limits) are kept.
   model?: string;                      // override SDK model (generator + critic)
   criticModel?: string;                // override model for the critic passes
                                        // (score + cluster) only; falls back to `model`.

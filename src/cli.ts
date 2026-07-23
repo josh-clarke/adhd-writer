@@ -18,7 +18,7 @@ type Flags = {
   ideas?: number;
   top?: number;
   concurrency?: number;
-  codeMode: boolean;
+  storyMode: boolean;
   stripAnchors: boolean;
   json: boolean;
   quiet: boolean;
@@ -42,7 +42,7 @@ function positiveInt(raw: string, flag: string, max: number): number {
 const MAX_CONTEXT_BYTES = 10 * 1024 * 1024; // 10 MB
 
 function parse(argv: string[]): Flags {
-  const f: Flags = { problem: "", codeMode: true, stripAnchors: true, json: false, quiet: false };
+  const f: Flags = { problem: "", storyMode: true, stripAnchors: true, json: false, quiet: false };
   const rest: string[] = [];
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -63,7 +63,7 @@ function parse(argv: string[]): Flags {
       }
       case "--model": f.model = argv[++i]; break;
       case "--critic-model": f.criticModel = argv[++i]; break;
-      case "--no-code-mode": f.codeMode = false; break;
+      case "--no-story-mode": f.storyMode = false; break;
       case "--no-anchor-strip": f.stripAnchors = false; break;
       case "--json": f.json = true; break;
       case "--quiet": f.quiet = true; break;
@@ -80,36 +80,36 @@ function parse(argv: string[]): Flags {
 }
 
 function printHelp() {
-  console.log(`adhd — a skill for coding agents
+  console.log(`adhd-writer — a skill for creative agents
 
-  Stop your agent from picking the first answer. Fans out many parallel
-  divergent thoughts under different cognitive frames, scores them,
+  Stop your agent from picking the first story idea. Fans out many parallel
+  divergent thoughts under different creative frames, scores them,
   prunes traps, and deepens the survivors. Tree-of-thought with pruning,
   built on the Claude Agent SDK.
 
 USAGE
-  adhd "<problem>" [flags]
+  adhd-writer "<prompt>" [flags]
 
 FLAGS
   --frames N        number of parallel divergence branches (default 5)
   --ideas N         ideas per branch (default 6)
   --top N           how many to deepen / focus on (default 3)
   --concurrency N   max parallel LLM calls (default 4)
-  --context PATH    file to inject as context (code, constraints, stack)
+  --context PATH    file to inject as context (draft, notes, constraints)
   --model NAME      override the SDK model (generator + critic)
   --critic-model N  override the model for the critic passes only
                     (score + cluster); decorrelates critic errors
-  --no-code-mode    don't bias frames toward engineering
-  --no-anchor-strip don't strip incidental anchors (stack, tool names) from
-                    the problem before fan-out; keep the raw problem as-is
+  --no-story-mode   don't bias frames toward story/craft
+  --no-anchor-strip don't strip incidental anchors (character names, settings)
+                    from the prompt before fan-out; keep the raw prompt as-is
   --json            emit RunResult as JSON
   --quiet           suppress progress events
   -h, --help
 
 EXAMPLES
-  adhd "design a rate limiter that survives a leader election"
-  adhd "name this function" --frames 3 --ideas 8 --top 2
-  adhd "..." --context ./snippet.ts --json > out.json
+  adhd-writer "a story about a lighthouse keeper who discovers the light is calling something"
+  adhd-writer "name this character" --frames 3 --ideas 8 --top 2
+  adhd-writer "..." --context ./draft.md --json > out.json
 `);
 }
 
@@ -136,7 +136,7 @@ async function main() {
     ideasPerFrame: flags.ideas,
     topK: flags.top,
     concurrency: flags.concurrency,
-    codeMode: flags.codeMode,
+    codeMode: flags.storyMode,
     stripAnchors: flags.stripAnchors,
     model: flags.model,
     criticModel: flags.criticModel,
