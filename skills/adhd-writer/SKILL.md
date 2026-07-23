@@ -149,13 +149,119 @@ These are how this skill goes wrong. Watch for them.
 
 ## Hermes Agent execution notes
 
-When running inside Hermes Agent (not Claude Code), the `Agent` / `Task` tool maps to `delegate_task`. Key adaptations:
+When running inside Hermes Agent (not Claude Code), the `Agent` / `Task` tool maps to two execution paths. Choose based on whether you want model diversity or simplicity.
+
+### Path A: `delegate_task` (simple, single-model)
+
+Use when all frames should run on the same model (your current session model).
 
 - **Parallel isolation:** Use `delegate_task` with `role='leaf'` for each frame. Each subagent gets a fresh context — no cross-talk. Batch all 5 calls in one `tasks` array for true parallelism.
 - **No tools in divergence:** The `delegate_task` tool does not accept a `tools` parameter, so the subagent inherits the parent's toolset. Instruct the subagent explicitly in the prompt: "Do not use any tools. Generate text only."
 - **JSON output:** Hermes subagents return summaries, not raw JSON. Instruct the subagent to output ONLY the JSON array, and parse it from the returned text.
 - **Convergence:** The score/cluster/deepen steps can run in the parent context (no isolation needed) or as a single `delegate_task` with the full idea pool.
 - **Cost control:** Hermes `delegate_task` max_concurrent_children defaults to 3. For 5 frames, batch as [3, 2] or use `terminal` with `npx adhd-writer` for the CLI version.
+
+### Path B: Kanban fan-out (multi-model, durable)
+
+Use when you want different frames to run on different models (e.g., creative frame on a strong prose model, hostile critic on a fast cheap model, dream logic on an experimental model). Also use when the work should survive a crash or when you want an audit trail.
+
+**How it works:** Create one Kanban task per frame, each assigned to a different worker profile. Each profile runs its own model. The dispatcher spawns them in parallel. A synthesis task (assigned to you, the orchestrator) collects results when all parents complete.
+
+**Step 0 — Discover available profiles:**
+
+```bash
+hermes profile list
+```
+
+Note which profiles exist and what models they run. You need at least as many profiles as frames you want to run in parallel. If you don't have enough profiles, create them first or fall back to `delegate_task`.
+
+**Step 1 — Create divergence tasks (one per frame):**
+
+Write each frame's prompt to a temp file, then create tasks via CLI:
+
+```bash
+# Write frame prompts to files
+cat > /tmp/frame-method-actor.md << 'EOF'
+You are in DIVERGENT mode. You are a generator, not a critic.
+Generate 6 short distinct ideas under the METHOD ACTOR frame.
+
+FRAME — METHOD ACTOR:
+You are a method actor preparing for a role. Inhabit the character completely — their posture, their speech patterns, their fears. What does the world look like through their eyes? What do they want that they can't say aloud? Generate ideas from inside that skin.
+
+PROBLEM:
+A story about a woman who inherits a house that doesn't want her to leave.
+
+Generate 6 ideas under this frame.
+Output JSON array only: [{"text": "...", "rationale": "..."}, ...]
+- text: one phrase/sentence, the idea itself
+- rationale: 1 short clause on why this frame surfaces it
+Do not evaluate, hedge, or rank. Just generate.
+EOF
+
+# Create task assigned to a worker profile
+hermes kanban create \
+  "adhd-writer diverge: method-actor" \
+  --assignee worker-deepseek \
+  --body "$(cat /tmp/frame-method-actor.md)" \
+  --json
+```
+
+Repeat for each frame, assigning to different profiles:
+
+| Frame | Suggested profile | Why |
+|---|---|---|
+| method actor | newsletter-writer (claude-sonnet) | Best prose quality for character interiority |
+| genre surgeon | coder-deepseek (deepseek-v4-pro) | Strong analytical deconstruction |
+| hostile critic | worker-glm (glm-5.2) | Fast, cheap, good at finding flaws |
+| dream logic | coding (nex-n2-pro) | Experimental, good at surreal leaps |
+| constraint box | worker-deepseek-2 (deepseek-v4-flash) | Fast, follows rules tightly |
+
+**Step 2 — Create synthesis task (gated on all divergence tasks):**
+
+```bash
+# After creating all 5 divergence tasks, note their IDs (t_xxx, t_yyy, ...)
+hermes kanban create \
+  "adhd-writer converge: score+cluster+deepen" \
+  --assignee default \
+  --body "$(cat /tmp/converge-prompt.md)" \
+  --parent t_xxx --parent t_yyy --parent t_zzz --parent t_aaa --parent t_bbb \
+  --json
+```
+
+The synthesis task stays in `todo` until all 5 parents reach `done`, then auto-promotes to `ready`.
+
+**Step 3 — Monitor and collect:**
+
+```bash
+# Watch the board
+hermes kanban list
+
+# When all divergence tasks are done, the synthesis task spawns
+# The synthesis worker reads all parent task outputs from the board
+# and produces the final converged result
+```
+
+**Key adaptations for Kanban:**
+
+- **No isolation violation:** Each Kanban task is a separate process with its own profile, model, and context. True isolation — stronger than `delegate_task` because even the model differs.
+- **JSON in comments:** Workers post results as task comments. The synthesis task reads all parent comments to collect the idea pool.
+- **Durability:** If a worker crashes, the task stays in `ready` and the dispatcher respawns it. `delegate_task` subagents are lost on parent crash.
+- **Audit trail:** Every idea, score, and decision is persisted in the Kanban SQLite DB forever.
+- **Model diversity:** Each frame can run on the model best suited to its cognitive style. This is the killer feature — you can't do this with `delegate_task`.
+
+**When to choose which path:**
+
+| Scenario | Path |
+|---|---|
+| Quick ideation, same model is fine | `delegate_task` |
+| Want different models per frame | Kanban |
+| Long-running, might crash | Kanban |
+| Need audit trail for decisions | Kanban |
+| User wants to watch/interject mid-process | Kanban |
+| CI/batch pipeline | Kanban |
+| One-shot creative brainstorm | `delegate_task` |
+
+**Fallback:** If Kanban feels too heavy for a quick brainstorm, use `delegate_task` with the batch pattern. If a worker profile crashes on Kanban protocol (some models like GLM 5.2 via OpenRouter fail to call `kanban_complete` reliably), reassign to `default` or fall back to `delegate_task(background=true)`.
 
 ## Companion library and CLI
 
