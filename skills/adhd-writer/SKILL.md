@@ -222,22 +222,22 @@ hermes kanban create \
   --json
 ```
 
-**Suggested profile mapping (updated fleet):**
+**Suggested profile mapping (updated fleet — all on OpenRouter):**
 
-| Frame | Profile | Model | Provider | Why |
-|---|---|---|---|---|
-| hostile critic (always) | worker-glm | z-ai/glm-5.2 | zai | Fast, direct, good at finding flaws |
-| child with crayons (always) | coder-xiaomi | xiaomi/mimo-v2.5 | openrouter | Experimental, good at absurd leaps |
-| inversion (always) | worker-deepseek | deepseek-v4-flash | deepseek | Fast, follows inversion logic tightly |
-| method actor | newsletter-writer | anthropic/claude-sonnet-5 | openrouter | Best prose quality for character interiority |
-| genre surgeon | coder-deepseek | deepseek-v4-pro | deepseek | Strong analytical deconstruction |
-| dream logic | coder-minimax | MiniMax-M3 | minimax | Creative, good at surreal associative leaps |
-| constraint box | worker-deepseek-2 | deepseek-v4-flash | deepseek | Fast, follows rules tightly |
-| sensory collage | worker-minimax | MiniMax-M3 | minimax | Strong sensory language |
-| unreliable narrator | newsletter-writer | anthropic/claude-sonnet-5 | openrouter | Best at voice and subtext |
-| silent film | coder-minimax | MiniMax-M3 | minimax | Visual storytelling |
-| myth & ritual | coder-deepseek | deepseek-v4-pro | deepseek | Deep knowledge retrieval |
-| synthesis (you) | default | z-ai/glm-5.2 | openrouter | Orchestrator judges and converges |
+| Frame | Profile | Model | Why |
+|---|---|---|---|
+| hostile critic (always) | worker-glm | z-ai/glm-5.2 | Fast, good at finding flaws |
+| child with crayons (always) | coder-deepseek | deepseek-v4-pro | Strong model for absurd, unencumbered leaps |
+| inversion (always) | coder-xiaomi | xiaomi/mimo-v2.5 | Experimental, good at flipping perspective |
+| method actor | newsletter-writer | z-ai/glm-5.2 | Good prose quality for character interiority |
+| genre surgeon | coder-deepseek | deepseek-v4-pro | Strong analytical deconstruction |
+| dream logic | coder-minimax | minimax/minimax-m3 | Creative, good at surreal associative leaps |
+| constraint box | worker-deepseek | deepseek-v4-flash | Fast, follows rules tightly |
+| sensory collage | worker-minimax | minimax/minimax-m3 | Strong sensory language |
+| unreliable narrator | newsletter-writer | z-ai/glm-5.2 | Good at voice and subtext |
+| silent film | coder-minimax | minimax/minimax-m3 | Visual storytelling |
+| myth & ritual | coder-deepseek | deepseek-v4-pro | Deep knowledge retrieval |
+| synthesis (you) | default | z-ai/glm-5.2 | Orchestrator judges and converges |
 
 **Step 2 — Synthesis (you, not a separate task):**
 
@@ -265,8 +265,10 @@ hermes kanban list
 - **Durability:** If a worker crashes, the task stays in `ready` and the dispatcher respawns it.
 - **Audit trail:** Every idea persists in the Kanban SQLite DB forever.
 - **Model diversity:** Each frame runs on the model best suited to its cognitive style. This is the killer feature — you can't do this with `delegate_task`.
-- **GLM on Z.AI direct:** GLM workers now use the Z.AI provider directly (not OpenRouter), which should be more reliable for Kanban protocol. If a GLM worker still crashes on Kanban, reassign to `worker-deepseek-2` or fall back to `delegate_task(background=true)`.
-- **MiniMax on direct provider:** MiniMax workers use the MiniMax provider directly.
+- **GLM workers on OpenRouter:** All GLM workers now use OpenRouter directly. No more Z.AI direct provider or Kanban protocol issues.
+- **MiniMax workers on OpenRouter:** All MiniMax workers use `minimax/minimax-m3` on OpenRouter.
+- **DeepSeek workers on OpenRouter with direct fallback:** DeepSeek workers use the DeepSeek provider directly with OpenRouter fallback (`deepseek/deepseek-v4-pro` or `deepseek/deepseek-v4-flash`).
+- If a worker still crashes on Kanban, reassign to `default` or fall back to `delegate_task(background=true)`.
 
 **When to choose which path:**
 
