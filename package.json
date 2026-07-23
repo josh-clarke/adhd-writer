@@ -1,12 +1,12 @@
 {
-  "name": "adhd-agent",
-  "version": "0.1.4",
-  "description": "ADHD — a skill for coding agents. Fans out many divergent thoughts in parallel under different cognitive frames, scores them, prunes traps, and deepens the survivors. Tree-of-thought with pruning, built on the Claude Agent SDK. The no-brainer skill for creative and interdisciplinary work.",
+  "name": "adhd-writer",
+  "version": "0.1.0",
+  "description": "ADHD Writer — a skill for creative agents. Fans out many divergent thoughts in parallel under different creative frames, scores them, prunes traps, and deepens the survivors. Tree-of-thought with pruning, built on the Claude Agent SDK. The no-brainer skill for creative writing and interdisciplinary ideation.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "adhd": "dist/cli.js"
+    "adhd-writer": "dist/cli.js"
   },
   "files": [
     "dist",
@@ -27,11 +27,15 @@
   },
   "keywords": [
     "adhd",
+    "creative-writing",
     "ideation",
     "tree-of-thought",
     "chain-of-thought",
     "divergent-thinking",
     "brainstorm",
+    "storytelling",
+    "poetry",
+    "screenwriting",
     "claude",
     "claude-agent-sdk",
     "agent",
@@ -46,11 +50,11 @@
   "author": "",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/UditAkhourii/adhd.git"
+    "url": "git+https://github.com/josh-clarke/adhd-writer.git"
   },
-  "homepage": "https://github.com/UditAkhourii/adhd#readme",
+  "homepage": "https://github.com/josh-clarke/adhd-writer#readme",
   "bugs": {
-    "url": "https://github.com/UditAkhourii/adhd/issues"
+    "url": "https://github.com/josh-clarke/adhd-writer/issues"
   },
   "engines": {
     "node": ">=18"
