@@ -313,40 +313,40 @@ export async function run(opts: RunOptions): Promise<RunResult> {
   const {
     problem,
     context,
-    framesPerRun = 5,
-    ideasPerFrame = 6,
-    topK = 3,
-    concurrency = 4,
-    codeMode = true,
-    stripAnchors = true,
-    model,
-    criticModel,
-    onEvent,
-    } = opts;
+    framesPerRun = 6,
+  ideasPerFrame = 6,
+  topK = 3,
+  concurrency = 4,
+  codeMode = true,
+  stripAnchors = true,
+  model,
+  criticModel,
+  onEvent,
+} = opts;
 
-    // The critic (score + cluster) can run on a different model from the
-    // generator to decorrelate errors. Defaults to the generator model.
-    const critic = criticModel ?? model;
+  // The critic (score + cluster) can run on a different model from the
+  // generator to decorrelate errors. Defaults to the generator model.
+  const critic = criticModel ?? model;
 
-    // PHASE 0 — REFRAME. Strip incidental anchors (current draft, existing
-    // character names) from the prompt before it ever reaches a branch.
-    // Every branch otherwise sees the same raw prompt, so an anchor buried
-    // in it infects all N branches regardless of branch isolation. Real
-    // constraints (theme, emotional tone, structural limits) are preserved.
-    // Convergence (score/cluster/deepen) still judges against the ORIGINAL
-    // prompt — an idea has to fit the real constraints to be viable.
-    let divergeProblem = problem;
-    let reframe: string | undefined;
-    if (stripAnchors) {
-      const r = await reframeProblem(problem, context, model);
-      if (r.changed && r.reframed.trim().length > 0) {
-        divergeProblem = r.reframed;
-        reframe = r.reframed;
-      }
-      onEvent?.({ kind: "reframe:done", changed: Boolean(reframe) });
+  // PHASE 0 — REFRAME. Strip incidental anchors (current draft, existing
+  // character names) from the prompt before it ever reaches a branch.
+  // Every branch otherwise sees the same raw prompt, so an anchor buried
+  // in it infects all N branches regardless of branch isolation. Real
+  // constraints (theme, emotional tone, structural limits) are preserved.
+  // Convergence (score/cluster/deepen) still judges against the ORIGINAL
+  // prompt — an idea has to fit the real constraints to be viable.
+  let divergeProblem = problem;
+  let reframe: string | undefined;
+  if (stripAnchors) {
+    const r = await reframeProblem(problem, context, model);
+    if (r.changed && r.reframed.trim().length > 0) {
+      divergeProblem = r.reframed;
+      reframe = r.reframed;
     }
+    onEvent?.({ kind: "reframe:done", changed: Boolean(reframe) });
+  }
 
-    const frames = selectFrames(framesPerRun, codeMode);
+  const frames = selectFrames(framesPerRun, codeMode);
   const limit = pLimit(concurrency);
 
   // PHASE 1 — DIVERGE. Pure parallel fan-out. No branch sees another.

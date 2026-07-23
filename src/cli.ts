@@ -87,11 +87,15 @@ function printHelp() {
   prunes traps, and deepens the survivors. Tree-of-thought with pruning,
   built on the Claude Agent SDK.
 
+  Minimum 6 frames per run. Three are always on: hostile critic (trap
+  detection), child with crayons (keep it weird), inversion (find the
+  blind spot). The rest are selected to enhance and contrast the prompt.
+
 USAGE
   adhd-writer "<prompt>" [flags]
 
 FLAGS
-  --frames N        number of parallel divergence branches (default 5)
+  --frames N        number of parallel divergence branches (default 6, min 6)
   --ideas N         ideas per branch (default 6)
   --top N           how many to deepen / focus on (default 3)
   --concurrency N   max parallel LLM calls (default 4)
@@ -108,7 +112,7 @@ FLAGS
 
 EXAMPLES
   adhd-writer "a story about a lighthouse keeper who discovers the light is calling something"
-  adhd-writer "name this character" --frames 3 --ideas 8 --top 2
+  adhd-writer "name this character" --frames 6 --ideas 8 --top 2
   adhd-writer "..." --context ./draft.md --json > out.json
 `);
 }

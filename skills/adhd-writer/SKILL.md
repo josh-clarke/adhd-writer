@@ -1,7 +1,7 @@
 ---
 name: adhd-writer
 description: Parallel divergent ideation for creative writing and ideation. Spawns N isolated branches under different creative frames (method actor, dream logic, genre surgeon, unreliable narrator, constraint box), scores, clusters, prunes traps, and deepens top survivors. Use on /adhd-writer, brainstorm/ideate intents, or open-ended story, poem, script, essay, and creative-concept decisions. Skip for grammar fixes, factual lookups, single-line rewrites, or closed phrasing ("quick", "standard", "just fix this"). Full pre-flight gate is in the skill body.
-version: 1.0.0
+version: 1.1.0
 author: Hermes Agent
 license: MIT
 metadata:
@@ -16,7 +16,7 @@ Stop picking the first story idea. The first three takes the model would give ar
 
 ## Pre-flight (run before Phase 1)
 
-This skill is expensive. About 10 Agent calls, 30 to 90 seconds wall clock, 5 to 10x a single answer. Do not pay that cost when a direct answer is better. Run this gate before Phase 1.
+This skill is expensive. About 12 Agent calls, 30 to 90 seconds wall clock, 5 to 10x a single answer. Do not pay that cost when a direct answer is better. Run this gate before Phase 1.
 
 **Step 1. Explicit invocation check.**
 
@@ -42,9 +42,17 @@ Two strict phases. Mixing them kills idea quality, because the critic strangles 
 
 For the prompt P:
 
-1. Pick 5 creative frames from the table below. Bias toward `story` or `craft` tags when the prompt is narrative-shaped. Always include at least one `wild` frame to keep range.
+1. Select frames. **Minimum 6 per run.** Three frames are always included:
 
-2. Spawn 5 **parallel** Agent/Task tool calls. One per frame. Each Agent gets only:
+   - **hostile critic** — catches traps, clichés, and been-done-to-death ideas before they waste a draft
+   - **child with crayons** — keeps divergence weird, stops the pool from collapsing into tasteful competence
+   - **inversion** — finds the blind spot by asking what makes it NOT work, then negating back
+
+   Fill the remaining 3+ slots from the selectable pool. Choose frames that both **enhance** the prompt (amplify its inherent strengths, dig deeper into its territory) and **contrast** it (pull in the opposite direction, import foreign logic). If the prompt is interior and emotional, add structural frames (constraint box, silent film). If it's plot-heavy, add sensory and voice frames (sensory collage, unreliable narrator). If it's grounded realism, add a wild frame (dream logic, myth & ritual). Vary picks across sessions.
+
+   When presenting the selection to the user, always offer 2-3 **alternative frame suggestions** they could swap in. Example: *"I'm running method-actor, genre-surgeon, and dream-logic for the selectable slots. If you want, you could swap dream-logic for unreliable-narrator (more grounded) or remove-the-obvious (more structural)."*
+
+2. Spawn 6 **parallel** Agent/Task tool calls. One per frame. Each Agent gets only:
    - the prompt P
    - any context the user provided
    - the chosen frame's vantage prompt
@@ -67,7 +75,9 @@ For the prompt P:
 
 ### Phase 2 — Focus (critic on)
 
-After all branches return:
+After all branches return, the synthesis step runs. **This can be you (the orchestrator/parent agent) — it does not need to be an isolated branch.** The synthesis reads all divergence outputs, but since it runs AFTER divergence is complete, there is no anchoring risk. The critic seeing all ideas is the whole point.
+
+If running via Kanban, the synthesis task can be assigned to the orchestrator's profile or any profile you trust for judgment. It does not need the same model diversity as the divergence phase — one good model is fine here.
 
 1. **Score.** Rate each idea on three axes 0 to 10: novelty (distance from the obvious default take), viability (could it actually work as a story/poem/script/piece), fit (does it address the stated prompt). For any idea that looks attractive but is a trap (cliché, been-done-to-death, structurally broken, emotionally hollow), flag it with a one-line reason.
 
@@ -90,19 +100,26 @@ After all branches return:
 
 ## Frames
 
-Pick 5 per run.
+Minimum 6 per run. Three are always on. The rest are selected to enhance and contrast the prompt.
+
+**Always on (backbone of every run):**
+
+| Frame | Why it's always on | Tags |
+|---|---|---|
+| **hostile critic** | Catches traps and clichés before they waste a draft. Every prompt benefits from having its obvious take attacked. | story, craft |
+| **child with crayons** | Keeps divergence weird. Stops the pool from collapsing into tasteful competence. The wild card that's always in the deck. | general, wild |
+| **inversion** | Finds the blind spot. Asks what makes it NOT work, then negates back. Every prompt has an inversion worth finding. | story, craft, general |
+
+**Selectable pool (choose 3+ to fill remaining slots):**
 
 | Frame | Vantage prompt | Tags |
 |---|---|---|
 | **method actor** | You are a method actor preparing for a role. Inhabit the character completely — their posture, their speech patterns, their fears. What does the world look like through their eyes? What do they want that they can't say aloud? Generate ideas from inside that skin. | story, craft |
 | **genre surgeon** | You dissect genres for a living. Take the tropes, conventions, and reader expectations of this genre and either subvert them brutally, hybridize two genres that shouldn't mix, or strip the genre down to its load-bearing element and rebuild from there. | story, craft |
-| **child with crayons** | You are a child with a box of crayons and no rules. Draw the story as you see it — absurd, impossible, full of wonder and nonsense. Ignore logic, physics, and publishing conventions. What would make a 7-year-old gasp? | general, wild |
-| **hostile critic** | You are a vicious critic who has read everything and hates everything. Attack the obvious take on this story/prompt. What's cliché, what's been done to death, what would make you throw the book across the room? Then invert each attack into an idea that avoids those traps. | story, craft |
 | **myth & ritual** | Reach into myth, folklore, fairy tales, and ritual structures. Steal archetypes, transformation patterns, taboo-and-transgression mechanics, or the monomyth's hidden gears. Force-fit them onto this prompt. | story, wild |
 | **dream logic** | Abandon causal logic. In dreams, meaning comes from juxtaposition, emotional resonance, and surreal transformation. Generate ideas that follow dream logic — where a door can be a mouth, a memory can be a room, and grief can wear a hat. | story, wild |
 | **constraint box** | You thrive under brutal constraints. What if this story could only use 100 words? Could only be told in second person? Had to happen in one room in real time? No dialogue allowed? Pick an extreme constraint and generate ideas that only exist inside it. | craft, wild |
 | **sensory collage** | You think in textures, smells, sounds, and temperatures — not plot. What does this story feel like on the skin? What does it smell like at 3am? Build ideas from pure sensory experience outward to narrative. | story, craft |
-| **inversion** | Ask the OPPOSITE question. If the goal is a compelling story, brainstorm how to guarantee a boring, broken, or unreadable one. Then negate each answer back into a viable idea. The villain's plan becomes the hero's arc, the ending becomes the opening. | story, craft, general |
 | **flash fiction** | You have 100 words and one sitting. No backstory, no setup, no explanation. What is the crudest, most essential version of this story that still lands an emotional punch? Strip to the bone. | story, general |
 | **epic sprawl** | You have unlimited time, unlimited budget, and a 10-book series deal. What is the maximalist, sprawling, no-constraints version of this story? What would only be possible at that scale? | story, wild |
 | **remove the obvious** | Name the thing everyone assumes this story needs — the hero, the conflict, the resolution, the setting, the genre convention. Imagine it's gone. What story exists in that absence? | story, craft, wild |
@@ -113,15 +130,17 @@ Pick 5 per run.
 | **the gossip** | You are the town gossip. You know everyone's secrets, everyone's business, and you love to talk. How does this story sound when whispered over a fence, embellished with each retelling? What version of the truth survives? | story, general |
 | **the translator** | You are translating this story from another language, another culture, another time. What gets lost in translation? What gains new meaning? How does the story bend when forced through a different linguistic and cultural lens? | story, craft |
 
-### Picking frames
+### Picking the selectable frames
 
-For story-shaped problems: pick 4 frames tagged `story` or `craft`, plus 1 tagged `wild`. For open creative or conceptual problems: a mix from all tags. Vary the picks across sessions so the same prompt produces different candidate sets when re-run.
+The goal is to **enhance and contrast** the prompt. If the prompt is interior and emotional, add structural frames (constraint box, silent film). If it's plot-heavy, add sensory and voice frames (sensory collage, unreliable narrator). If it's grounded realism, add a wild frame (dream logic, myth & ritual). If it's high-concept, add a stripping frame (flash fiction, remove the obvious).
+
+**Always offer alternatives.** When presenting your selection, list 2-3 frames the user could swap in. Example: *"Running method-actor, genre-surgeon, dream-logic. Could swap dream-logic for unreliable-narrator (more grounded) or remove-the-obvious (more structural)."*
 
 ## Output shape
 
 After Phase 2, render in this order. Do not collapse it into a wall of prose. The structure is the point.
 
-1. **Brief.** One or two lines confirming the prompt and any reframe used.
+1. **Brief.** One or two lines confirming the prompt and any reframe used. List the frames selected and note which were always-on vs chosen.
 2. **Wide set.** Full pool grouped by cluster. Each cluster labeled by underlying angle. Each idea is one short phrase. Show score chips like `[N7 V8 F9]` next to each.
 3. **Converge.** A 2 to 4 idea shortlist. State why each is on the list. Mark the non-obvious-but-viable pick explicitly with ★. List traps separately, each with the one-line reason it is a trap.
 4. **Focus.** The 3 deepened branches. For each: the sketch, the load-bearing risk, the first concrete step, and the child ideas.
@@ -136,16 +155,18 @@ These are how this skill goes wrong. Watch for them.
 - **Walls of equally-weighted prose.** Cluster, label, pull out the best. Structure is half the value.
 - **Refusing to commit.** After diverging, take a position on what is actually promising. "Here are 20 ideas, you decide" is a cop-out. Generate wide, but converge with a real opinion.
 - **Skipping the isolation invariant.** If you simulate parallel branches by writing them sequentially in one context, you have not done ADHD. You have done a wider single thought. The Agent/Task tool gives each branch a fresh context. Use it.
+- **Skipping the always-on frames.** The critic, crayons, and inversion are non-negotiable. If you drop one to save cost, you've broken the method's backbone. Reduce the selectable pool first.
 
 ## Calibration
 
-- **How many ideas?** Scale to stakes. Quick "name this character" = 3 frames × 4 ideas. "What should this novel be about" = 5 frames × 8 ideas. Default is 5 × 6 = 30.
+- **How many ideas?** Scale to stakes. Quick "name this character" = 6 frames × 4 ideas. "What should this novel be about" = 6 frames × 8 ideas. Default is 6 × 6 = 36.
 - **How weird?** Read the room. Serious literary work: flag the wild cards clearly so they do not read as unserious. Open brainstorming or play: let it run loose. Absurd ideas earn their place by seeding viable ones.
 - **When to stop diverging?** Stop when new candidates start repeating the shape of existing ones. The space is mapped. Do not pad to hit a number.
+- **How many frames?** Minimum 6 (3 always-on + 3 selectable). For high-stakes work, run 8-10. Never drop below 6. Never drop the always-on three.
 
 ## Cost
 
-5 diverge + 1 score + 1 cluster + 3 deepen ≈ 10 Agent calls per run. About 5 to 10x a single-shot answer. Not for every keystroke. For decision points where the cost of the obvious take is high.
+6 diverge + 1 score + 1 cluster + 3 deepen ≈ 11 Agent calls per run. About 5 to 10x a single-shot answer. Not for every keystroke. For decision points where the cost of the obvious take is high.
 
 ## Hermes Agent execution notes
 
@@ -155,17 +176,18 @@ When running inside Hermes Agent (not Claude Code), the `Agent` / `Task` tool ma
 
 Use when all frames should run on the same model (your current session model).
 
-- **Parallel isolation:** Use `delegate_task` with `role='leaf'` for each frame. Each subagent gets a fresh context — no cross-talk. Batch all 5 calls in one `tasks` array for true parallelism.
+- **Parallel isolation:** Use `delegate_task` with `role='leaf'` for each frame. Each subagent gets a fresh context — no cross-talk. Batch calls in a `tasks` array for true parallelism. Note: `max_concurrent_children` defaults to 3, so batch 6 frames as two waves of 3, or raise the limit in config.
 - **No tools in divergence:** The `delegate_task` tool does not accept a `tools` parameter, so the subagent inherits the parent's toolset. Instruct the subagent explicitly in the prompt: "Do not use any tools. Generate text only."
 - **JSON output:** Hermes subagents return summaries, not raw JSON. Instruct the subagent to output ONLY the JSON array, and parse it from the returned text.
-- **Convergence:** The score/cluster/deepen steps can run in the parent context (no isolation needed) or as a single `delegate_task` with the full idea pool.
-- **Cost control:** Hermes `delegate_task` max_concurrent_children defaults to 3. For 5 frames, batch as [3, 2] or use `terminal` with `npx adhd-writer` for the CLI version.
+- **Synthesis = you.** The score/cluster/deepen steps run in the parent context (no isolation needed). You are the critic. You read all 6 branch outputs, score them, cluster them, and deepen the top 3 yourself. This is by design — the synthesis is not an isolated branch, it's the convergent judgment that follows divergence.
 
 ### Path B: Kanban fan-out (multi-model, durable)
 
-Use when you want different frames to run on different models (e.g., creative frame on a strong prose model, hostile critic on a fast cheap model, dream logic on an experimental model). Also use when the work should survive a crash or when you want an audit trail.
+Use when you want different frames to run on different models. Also use when the work should survive a crash or when you want an audit trail.
 
-**How it works:** Create one Kanban task per frame, each assigned to a different worker profile. Each profile runs its own model. The dispatcher spawns them in parallel. A synthesis task (assigned to you, the orchestrator) collects results when all parents complete.
+**How it works:** Create one Kanban task per frame, each assigned to a different worker profile. Each profile runs its own model. The dispatcher spawns them in parallel. A synthesis task collects results when all parents complete.
+
+**Synthesis can be you.** The synthesis task does NOT need to be a separate isolated branch. It can be assigned to `default` (the orchestrator's profile) — the orchestrator reads all parent task outputs from the board and performs score/cluster/deepen in its own context. Since synthesis runs AFTER all divergence is complete, there is no anchoring risk. The critic seeing all ideas is the whole point. Alternatively, assign synthesis to a strong judgment model if you want it automated.
 
 **Step 0 — Discover available profiles:**
 
@@ -173,81 +195,78 @@ Use when you want different frames to run on different models (e.g., creative fr
 hermes profile list
 ```
 
-Note which profiles exist and what models they run. You need at least as many profiles as frames you want to run in parallel. If you don't have enough profiles, create them first or fall back to `delegate_task`.
-
-**Step 1 — Create divergence tasks (one per frame):**
+**Step 1 — Create divergence tasks (one per frame, 6 minimum):**
 
 Write each frame's prompt to a temp file, then create tasks via CLI:
 
 ```bash
-# Write frame prompts to files
-cat > /tmp/frame-method-actor.md << 'EOF'
+cat > /tmp/frame-hostile-critic.md << 'EOF'
 You are in DIVERGENT mode. You are a generator, not a critic.
-Generate 6 short distinct ideas under the METHOD ACTOR frame.
+Generate 6 short distinct ideas under the HOSTILE CRITIC frame.
 
-FRAME — METHOD ACTOR:
-You are a method actor preparing for a role. Inhabit the character completely — their posture, their speech patterns, their fears. What does the world look like through their eyes? What do they want that they can't say aloud? Generate ideas from inside that skin.
+FRAME — HOSTILE CRITIC:
+You are a vicious critic who has read everything and hates everything. Attack the obvious take on this story/prompt. What's cliché, what's been done to death, what would make you throw the book across the room? Then invert each attack into an idea that avoids those traps.
 
 PROBLEM:
 A story about a woman who inherits a house that doesn't want her to leave.
 
 Generate 6 ideas under this frame.
 Output JSON array only: [{"text": "...", "rationale": "..."}, ...]
-- text: one phrase/sentence, the idea itself
-- rationale: 1 short clause on why this frame surfaces it
 Do not evaluate, hedge, or rank. Just generate.
 EOF
 
-# Create task assigned to a worker profile
 hermes kanban create \
-  "adhd-writer diverge: method-actor" \
-  --assignee worker-deepseek \
-  --body "$(cat /tmp/frame-method-actor.md)" \
+  "adhd-writer diverge: hostile-critic" \
+  --assignee worker-glm \
+  --body "$(cat /tmp/frame-hostile-critic.md)" \
   --json
 ```
 
-Repeat for each frame, assigning to different profiles:
+**Suggested profile mapping (updated fleet):**
 
-| Frame | Suggested profile | Why |
-|---|---|---|
-| method actor | newsletter-writer (claude-sonnet) | Best prose quality for character interiority |
-| genre surgeon | coder-deepseek (deepseek-v4-pro) | Strong analytical deconstruction |
-| hostile critic | worker-glm (glm-5.2) | Fast, cheap, good at finding flaws |
-| dream logic | coding (nex-n2-pro) | Experimental, good at surreal leaps |
-| constraint box | worker-deepseek-2 (deepseek-v4-flash) | Fast, follows rules tightly |
+| Frame | Profile | Model | Provider | Why |
+|---|---|---|---|---|
+| hostile critic (always) | worker-glm | z-ai/glm-5.2 | zai | Fast, direct, good at finding flaws |
+| child with crayons (always) | coder-xiaomi | xiaomi/mimo-v2.5 | openrouter | Experimental, good at absurd leaps |
+| inversion (always) | worker-deepseek | deepseek-v4-flash | deepseek | Fast, follows inversion logic tightly |
+| method actor | newsletter-writer | anthropic/claude-sonnet-5 | openrouter | Best prose quality for character interiority |
+| genre surgeon | coder-deepseek | deepseek-v4-pro | deepseek | Strong analytical deconstruction |
+| dream logic | coder-minimax | MiniMax-M3 | minimax | Creative, good at surreal associative leaps |
+| constraint box | worker-deepseek-2 | deepseek-v4-flash | deepseek | Fast, follows rules tightly |
+| sensory collage | worker-minimax | MiniMax-M3 | minimax | Strong sensory language |
+| unreliable narrator | newsletter-writer | anthropic/claude-sonnet-5 | openrouter | Best at voice and subtext |
+| silent film | coder-minimax | MiniMax-M3 | minimax | Visual storytelling |
+| myth & ritual | coder-deepseek | deepseek-v4-pro | deepseek | Deep knowledge retrieval |
+| synthesis (you) | default | z-ai/glm-5.2 | openrouter | Orchestrator judges and converges |
 
-**Step 2 — Create synthesis task (gated on all divergence tasks):**
+**Step 2 — Synthesis (you, not a separate task):**
+
+When all 6 divergence tasks complete, collect their outputs:
 
 ```bash
-# After creating all 5 divergence tasks, note their IDs (t_xxx, t_yyy, ...)
-hermes kanban create \
-  "adhd-writer converge: score+cluster+deepen" \
-  --assignee default \
-  --body "$(cat /tmp/converge-prompt.md)" \
-  --parent t_xxx --parent t_yyy --parent t_zzz --parent t_aaa --parent t_bbb \
-  --json
+# Read each task's output
+for id in t_xxx t_yyy t_zzz t_aaa t_bbb t_ccc; do
+  hermes kanban show $id --json | jq -r '.runs[-1].summary'
+done
 ```
 
-The synthesis task stays in `todo` until all 5 parents reach `done`, then auto-promotes to `ready`.
+Then run score/cluster/deepen yourself in the orchestrator context. You are the critic. You do not need a separate Kanban task for this unless you want the synthesis automated — in which case assign it to `default` with all 6 parents.
 
-**Step 3 — Monitor and collect:**
+**Step 3 — Monitor:**
 
 ```bash
-# Watch the board
 hermes kanban list
-
-# When all divergence tasks are done, the synthesis task spawns
-# The synthesis worker reads all parent task outputs from the board
-# and produces the final converged result
 ```
 
 **Key adaptations for Kanban:**
 
 - **No isolation violation:** Each Kanban task is a separate process with its own profile, model, and context. True isolation — stronger than `delegate_task` because even the model differs.
-- **JSON in comments:** Workers post results as task comments. The synthesis task reads all parent comments to collect the idea pool.
-- **Durability:** If a worker crashes, the task stays in `ready` and the dispatcher respawns it. `delegate_task` subagents are lost on parent crash.
-- **Audit trail:** Every idea, score, and decision is persisted in the Kanban SQLite DB forever.
-- **Model diversity:** Each frame can run on the model best suited to its cognitive style. This is the killer feature — you can't do this with `delegate_task`.
+- **JSON in comments:** Workers post results as task comments. Read them via `hermes kanban show <id> --json`.
+- **Durability:** If a worker crashes, the task stays in `ready` and the dispatcher respawns it.
+- **Audit trail:** Every idea persists in the Kanban SQLite DB forever.
+- **Model diversity:** Each frame runs on the model best suited to its cognitive style. This is the killer feature — you can't do this with `delegate_task`.
+- **GLM on Z.AI direct:** GLM workers now use the Z.AI provider directly (not OpenRouter), which should be more reliable for Kanban protocol. If a GLM worker still crashes on Kanban, reassign to `worker-deepseek-2` or fall back to `delegate_task(background=true)`.
+- **MiniMax on direct provider:** MiniMax workers use the MiniMax provider directly.
 
 **When to choose which path:**
 
@@ -261,7 +280,7 @@ hermes kanban list
 | CI/batch pipeline | Kanban |
 | One-shot creative brainstorm | `delegate_task` |
 
-**Fallback:** If Kanban feels too heavy for a quick brainstorm, use `delegate_task` with the batch pattern. If a worker profile crashes on Kanban protocol (some models like GLM 5.2 via OpenRouter fail to call `kanban_complete` reliably), reassign to `default` or fall back to `delegate_task(background=true)`.
+**Fallback:** If Kanban feels too heavy for a quick brainstorm, use `delegate_task` with the batch pattern. If a worker profile crashes on Kanban protocol, reassign to `default` or fall back to `delegate_task(background=true)`.
 
 ## Companion library and CLI
 

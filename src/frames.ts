@@ -11,6 +11,11 @@ export type Frame = {
   // Creative domain tag — used by the orchestrator to bias frame
   // selection when the problem looks story-shaped.
   tags: ("story" | "craft" | "general" | "wild")[];
+  // If true, this frame is always included in every run. The three
+  // always-on frames form the skill's backbone: the critic catches
+  // traps, the crayons keep it weird, the inversion finds the blind
+  // spots. The rest are selected to enhance or contrast the prompt.
+  always?: boolean;
 };
 
 export const FRAMES: Frame[] = [
@@ -34,6 +39,7 @@ export const FRAMES: Frame[] = [
     prompt:
       "You are a child with a box of crayons and no rules. Draw the story as you see it — absurd, impossible, full of wonder and nonsense. Ignore logic, physics, and publishing conventions. What would make a 7-year-old gasp?",
     tags: ["general", "wild"],
+    always: true,
   },
   {
     id: "hostile-critic",
@@ -41,6 +47,7 @@ export const FRAMES: Frame[] = [
     prompt:
       "You are a vicious critic who has read everything and hates everything. Attack the obvious take on this story/prompt. What's cliché, what's been done to death, what would make you throw the book across the room? Then invert each attack into an idea that avoids those traps.",
     tags: ["story", "craft"],
+    always: true,
   },
   {
     id: "myth-and-ritual",
@@ -76,17 +83,18 @@ export const FRAMES: Frame[] = [
     prompt:
       "Ask the OPPOSITE question. If the goal is a compelling story, brainstorm how to guarantee a boring, broken, or unreadable one. Then negate each answer back into a viable idea. The villain's plan becomes the hero's arc, the ending becomes the opening.",
     tags: ["story", "craft", "general"],
+    always: true,
   },
   {
     id: "flash-fiction",
-    label: "Extreme: 100 words, one sitting",
+    label: "Flash fiction",
     prompt:
       "You have 100 words and one sitting. No backstory, no setup, no explanation. What is the crudest, most essential version of this story that still lands an emotional punch? Strip to the bone.",
     tags: ["story", "general"],
   },
   {
     id: "epic-sprawl",
-    label: "Extreme: 10-book series, infinite budget",
+    label: "Epic sprawl",
     prompt:
       "You have unlimited time, unlimited budget, and a 10-book series deal. What is the maximalist, sprawling, no-constraints version of this story? What would only be possible at that scale?",
     tags: ["story", "wild"],
@@ -152,17 +160,42 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-// Pick N frames for a run. Bias toward story/craft tags when storyMode is on,
-// but always include at least one wildcard so divergence stays weird.
-export function selectFrames(n: number, storyMode = true): Frame[] {
-  const pool = storyMode
-    ? FRAMES.filter((f) => f.tags.includes("story") || f.tags.includes("craft"))
-    : [...FRAMES];
-  const wild = FRAMES.filter((f) => f.tags.includes("wild"));
+// The three always-on frames. These form the skill's backbone:
+// - hostile-critic: catches traps and clichés before they waste a draft
+// - child-with-crayons: keeps divergence weird, stops the pool from collapsing
+//   into tasteful competence
+// - inversion: finds the blind spot by asking what makes it NOT work
+const ALWAYS_FRAMES = FRAMES.filter((f) => f.always);
 
-  const shuffled = shuffle(pool);
-  const picked = shuffled.slice(0, Math.max(1, n - 1));
-  const wildPick = wild[Math.floor(Math.random() * wild.length)];
-  if (!picked.find((f) => f.id === wildPick.id)) picked.push(wildPick);
-  return picked.slice(0, n);
+// Pick N frames for a run. Three frames are always included (critic, crayons,
+// inversion). The remaining slots are filled from the selectable pool, biased
+// toward story/craft tags when storyMode is on, with at least one wild card.
+export function selectFrames(n: number = 6, storyMode = true): Frame[] {
+  const minN = Math.max(3, n);
+  const alwaysCount = Math.min(ALWAYS_FRAMES.length, minN);
+  const remainingSlots = minN - alwaysCount;
+
+  // Selectable pool excludes always-on frames
+  const selectablePool = FRAMES.filter((f) => !f.always);
+  const storyPool = storyMode
+    ? selectablePool.filter((f) => f.tags.includes("story") || f.tags.includes("craft"))
+    : selectablePool;
+  const wildPool = selectablePool.filter((f) => f.tags.includes("wild"));
+
+  // Fill remaining slots from the shuffled story pool
+  const shuffled = shuffle(storyPool);
+  let picked = shuffled.slice(0, remainingSlots);
+
+  // Ensure at least one wild card among the selectable frames
+  // (the always-on crayons is already wild, but we want diversity)
+  const hasWild = picked.some((f) => f.tags.includes("wild"));
+  if (!hasWild && remainingSlots > 0) {
+    const wildPick = wildPool[Math.floor(Math.random() * wildPool.length)];
+    if (wildPick) {
+      picked[picked.length - 1] = wildPick;
+    }
+  }
+
+  // Shuffle the order so the always-on frames aren't always first
+  return shuffle([...ALWAYS_FRAMES.slice(0, alwaysCount), ...picked]);
 }
