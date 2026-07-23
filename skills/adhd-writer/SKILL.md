@@ -140,6 +140,8 @@ The goal is to **enhance and contrast** the prompt. If the prompt is interior an
 
 After Phase 2, render in this order. Do not collapse it into a wall of prose. The structure is the point.
 
+**Workbench directory.** Before firing any subagents, create a session folder at `/Users/josh/Documents/Areas/Workbench/adhd-writer-<YYYYMMDD-HHMMSS>/`. Write each subagent's raw output to a file in that folder (e.g. `frame-hostile-critic.md`, `frame-child-with-crayons.md`, etc.). Write the final synthesis document there too (e.g. `synthesis.md`). Do NOT delete subagent work — keep it for archive. This gives Josh a trail of every frame's raw ideas alongside the final converged output.
+
 1. **Brief.** One or two lines confirming the prompt and any reframe used. List the frames selected and note which were always-on vs chosen.
 2. **Wide set.** Full pool grouped by cluster. Each cluster labeled by underlying angle. Each idea is one short phrase. Show score chips like `[N7 V8 F9]` next to each.
 3. **Converge.** A 2 to 4 idea shortlist. State why each is on the list. Mark the non-obvious-but-viable pick explicitly with ★. List traps separately, each with the one-line reason it is a trap.
