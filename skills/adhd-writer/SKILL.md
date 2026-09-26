@@ -219,27 +219,29 @@ EOF
 
 hermes kanban create \
   "adhd-writer diverge: hostile-critic" \
-  --assignee worker-glm \
+  --assignee senior-worker-astra \
   --body "$(cat /tmp/frame-hostile-critic.md)" \
   --json
 ```
 
-**Suggested profile mapping (updated fleet — all on OpenRouter):**
+**Suggested profile mapping** (verify with `hermes profile list` before fan-out; rosters drift):
 
 | Frame | Profile | Model | Why |
 |---|---|---|---|
-| hostile critic (always) | worker-glm | z-ai/glm-5.2 | Fast, good at finding flaws |
-| child with crayons (always) | coder-deepseek | deepseek-v4-pro | Strong model for absurd, unencumbered leaps |
-| inversion (always) | coder-xiaomi | xiaomi/mimo-v2.5 | Experimental, good at flipping perspective |
-| method actor | newsletter-writer | z-ai/glm-5.2 | Good prose quality for character interiority |
-| genre surgeon | coder-deepseek | deepseek-v4-pro | Strong analytical deconstruction |
-| dream logic | coder-minimax | minimax/minimax-m3 | Creative, good at surreal associative leaps |
-| constraint box | worker-deepseek | deepseek-v4-flash | Fast, follows rules tightly |
-| sensory collage | worker-minimax | minimax/minimax-m3 | Strong sensory language |
-| unreliable narrator | newsletter-writer | z-ai/glm-5.2 | Good at voice and subtext |
-| silent film | coder-minimax | minimax/minimax-m3 | Visual storytelling |
-| myth & ritual | coder-deepseek | deepseek-v4-pro | Deep knowledge retrieval |
-| synthesis (you) | default | z-ai/glm-5.2 | Orchestrator judges and converges |
+| hostile critic (always) | senior-worker-astra | gpt-6-astra (Codex) | Rigorous critique, structure, logic |
+| child with crayons (always) | worker-gemini-flash | ~google/gemini-flash-latest | Loose, playful divergence |
+| inversion (always) | senior-worker-kimi | moonshotai/kimi-k3 | Perspective-flipping, unconventional angles |
+| method actor | senior-worker-opus | ~anthropic/claude-opus-latest | Prose, voice, character interiority |
+| genre surgeon | worker-deepseek-flash | ~deepseek/deepseek-flash-latest | Cheap, rule-following analysis |
+| dream logic | senior-worker-deepseek | ~deepseek/deepseek-pro-latest | Strong surreal associative leaps |
+| constraint box | worker-deepseek-flash | ~deepseek/deepseek-flash-latest | Follows tight rules |
+| sensory collage | worker-glm-flash | ~z-ai/glm-flash-latest | Fast divergent sensory frames |
+| unreliable narrator | senior-worker-opus | ~anthropic/claude-opus-latest | Voice and subtext |
+| silent film | senior-worker-deepseek | ~deepseek/deepseek-pro-latest | Visual storytelling |
+| myth & ritual | worker-glm-flash | ~z-ai/glm-flash-latest | Fast divergent thematic frames |
+| synthesis (you) | default | gpt-6-astra (Codex) | Orchestrator judges and converges |
+
+Josh chose critic = Astra, voice frames = Opus, and dream logic / silent film = DeepSeek Pro. Keep those pairings unless he changes them.
 
 **Step 2 — Synthesis (you, not a separate task):**
 
