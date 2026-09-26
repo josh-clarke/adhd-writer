@@ -232,7 +232,7 @@ hermes kanban create \
 | child with crayons (always) | worker-gemini-flash | ~google/gemini-flash-latest | Loose, playful divergence |
 | inversion (always) | senior-worker-kimi | moonshotai/kimi-k3 | Perspective-flipping, unconventional angles |
 | method actor | senior-worker-opus | ~anthropic/claude-opus-latest | Prose, voice, character interiority |
-| genre surgeon | worker-deepseek-flash | ~deepseek/deepseek-flash-latest | Cheap, rule-following analysis |
+| genre surgeon | senior-worker-glm | ~z-ai/glm-latest | Strong genre deconstruction |
 | dream logic | senior-worker-deepseek | ~deepseek/deepseek-pro-latest | Strong surreal associative leaps |
 | constraint box | worker-deepseek-flash | ~deepseek/deepseek-flash-latest | Follows tight rules |
 | sensory collage | worker-glm-flash | ~z-ai/glm-flash-latest | Fast divergent sensory frames |
@@ -241,7 +241,7 @@ hermes kanban create \
 | myth & ritual | worker-glm-flash | ~z-ai/glm-flash-latest | Fast divergent thematic frames |
 | synthesis (you) | default | gpt-6-astra (Codex) | Orchestrator judges and converges |
 
-Josh chose critic = Astra, voice frames = Opus, and dream logic / silent film = DeepSeek Pro. Keep those pairings unless he changes them.
+Josh chose critic = Astra, voice frames = Opus, dream logic / silent film = DeepSeek Pro, and genre surgeon = GLM. Keep those pairings unless he changes them.
 
 **Step 2 — Synthesis (you, not a separate task):**
 
